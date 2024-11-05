@@ -1,0 +1,9 @@
+{
+  "GLOBAL": {
+    "MENU": {
+      "CHAT": "Chat",
+      "FRIEND": "Friend",
+      "SETTING": "Setting"
+    }
+  }
+}

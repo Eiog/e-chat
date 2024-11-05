@@ -1,3 +1,4 @@
+<!-- eslint-disable no-console -->
 <script setup lang='ts'>
 defineOptions({
 
@@ -5,19 +6,21 @@ defineOptions({
 definePage({
   meta: {
     layout: 'default',
-    title: 'Hello World',
+    title: 'CHAT',
+    requireAuth: true,
     keepAlive: true,
+    icon: 'i-mage-message-conversation',
   },
-})
-useHead({
-  title: '首页',
 })
 </script>
 
 <template>
-  <div class="flex-col-center gap-10">
-    <!-- <HelloWorld /> -->
-  </div>
+  <MainLayout>
+    <template #aside>
+      <ChatList />
+    </template>
+    <ChatWindow />
+  </MainLayout>
 </template>
 
 <style scoped lang='less'>

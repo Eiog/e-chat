@@ -1,12 +1,18 @@
 /* eslint-disable no-console */
 
+import { readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import process from 'node:process'
-import { createApp, createRouter, defineEventHandler, readBody, toNodeListener } from 'h3'
-import { WebSocketServer } from 'ws'
+import { createApp, createError, defineEventHandler, serveStatic, toNodeListener, useBase } from 'h3'
+import { join } from 'pathe'
+import * as routers from './api'
+import { getToken, isObjectId } from './helps'
+import { verify } from './jwt'
+import './chat'
+import './db'
 
 const PORT = Number(process.env.PORT) || 5632
-
+const UPLOAD_DIR = 'upload'
 const app = createApp({
   debug: true,
   onError: (error) => {
@@ -15,36 +21,59 @@ const app = createApp({
   onRequest: async (event) => {
     console.log('Request:', event.path)
   },
-
 })
-const router = createRouter()
-app.use(router)
-router.get('/', defineEventHandler(() => {
-  return 'hello world'
+app.use('/api/file', defineEventHandler(async (event) => {
+  return serveStatic(event, {
+    getContents: id => readFile(join(UPLOAD_DIR, id)),
+    getMeta: async (id) => {
+      const stats = await stat(join(UPLOAD_DIR, id)).catch(() => {})
+
+      if (!stats || !stats.isFile()) {
+        return
+      }
+
+      return {
+        size: stats.size,
+        mtime: stats.mtimeMs,
+      }
+    },
+  })
 }))
-router.get('/json', defineEventHandler(() => {
-  return {
-    data: '123',
+app.use(defineEventHandler(async (event) => {
+  const excludePath = ['/api/login', '/api/fs/upload']
+  try {
+    if (!excludePath.includes(event.path)) {
+      const token = getToken(event)
+      const jwt = await verify(token)
+      if (!jwt) {
+        throw createError({
+          status: 401,
+          statusMessage: 'No Permission',
+          message: 'Token无效',
+        })
+      }
+      const _id = jwt._id
+      if (!isObjectId(_id)) {
+        throw createError({
+          status: 401,
+          statusMessage: 'No Permission',
+          message: '_id验证错误',
+        })
+      }
+      event.context._id = jwt._id
+    }
+  }
+  catch {
+    throw createError({
+      status: 401,
+      statusMessage: 'No Permission',
+      message: 'Token无效',
+    })
   }
 }))
-router.post('/test', defineEventHandler(async (ev) => {
-  const body = await readBody(ev)
-  return {
-    data: '123',
-    body,
-  }
-}))
-const wss = new WebSocketServer({ path: '/_ws', port: PORT + 1 }, () => {
-  console.log(`socket is running at http://127.0.0.1:${PORT + 1}${'/_ws'}`)
+Object.values(routers).forEach((f) => {
+  app.use(useBase('/api', f.handler))
 })
-wss.on('connection', (ws) => {
-  console.log('connection')
-  ws.send('connection')
-})
-wss.on('error', () => {
-  console.log('error')
-})
-
 const server = createServer(toNodeListener(app))
 server.listen(PORT, () => {
   console.log(`server is running at http://127.0.0.1:${PORT}/`)

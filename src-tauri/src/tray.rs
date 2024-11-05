@@ -4,6 +4,9 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Emitter, Manager, Runtime,
 };
+use std::collections::HashMap;
+use std::sync::Mutex;
+
 pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
     let quit_i = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
     let setting_i = MenuItem::with_id(app, "setting", "设置", true, None::<&str>)?;
@@ -22,7 +25,7 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
             // Add more events here
             _ => {}
         })
-        .on_tray_icon_event(|tray, event: TrayIconEvent| match event {
+        .on_tray_icon_event(move |tray, event: TrayIconEvent| match event {
             TrayIconEvent::Click {
                 id: _,
                 position: _,
@@ -32,12 +35,17 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
             } => match button {
                 MouseButton::Left {} => match button_state {
                     MouseButtonState::Up => {
-                        let app = tray.app_handle();
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.unminimize();
-                            let _ = window.set_focus();
-                        }
+                      let app = tray.app_handle();
+                      if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.unminimize();
+                        let _ = window.set_focus();
+                      }
+                      else if let Some(window) = app.get_webview_window("login") {
+                        let _ = window.show();
+                        let _ = window.unminimize();
+                        let _ = window.set_focus();
+                      }
                     }
                     MouseButtonState::Down => {}
                 },

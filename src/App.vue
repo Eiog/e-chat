@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { listen } from '@tauri-apps/api/event'
-
 useHead({
   title: import.meta.env.VITE_APP_NAME,
   meta: [
@@ -18,10 +16,14 @@ useHead({
     },
   ],
 })
-const router = useRouter()
-listen('open-setting', () => {
-  router.push('/setting')
-})
+// async function store() {
+//   const store = await useTauriStore()
+//   await store.set('logged', false)
+//   await store.save()
+//   const logged = await store.get('logged')
+//   console.log(logged)
+// }
+// store()
 </script>
 
 <template>
@@ -32,6 +34,7 @@ listen('open-setting', () => {
       </Transition>
     </RouterView>
     <NotivueProvider />
+    <ContextMenuPanel />
   </NaiveProvider>
 </template>
 

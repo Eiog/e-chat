@@ -11,7 +11,7 @@ declare module 'vue-router' {
     layout?: string
     title?: string
     keepAlive?: boolean
-    layout?: string
     transition?: string
+    icon?: string
   }
 }

@@ -26,3 +26,18 @@
   - `ci` 持续集成
   - `types` 类型定义文件更改
   - `wip` 开发中
+    {
+    "title": "Main",
+    "label": "main",
+    "width": 1000,
+    "height": 600,
+    "center": true,
+    "resizable": true,
+    "maximizable": true,
+    "fullscreen": false,
+    "decorations": false,
+    "transparent": true,
+    "titleBarStyle": "Visible",
+    "hiddenTitle": true,
+    "visible": false
+    },

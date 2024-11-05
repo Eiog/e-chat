@@ -1,13 +1,7 @@
-/* eslint-disable no-console */
 import type { Router } from 'vue-router/auto'
 
 export function useRouteGuard(router: Router) {
-  const { start, done } = useNProgress()
   router.beforeEach((to, from, next) => {
-    const { language } = useLanguage()
-    console.log(language.value)
-
-    start()
     next()
   })
   router.afterEach((to, from) => {
@@ -16,6 +10,5 @@ export function useRouteGuard(router: Router) {
     to.meta.transition = toDepth < fromDepth ? 'slide-right' : toDepth > fromDepth ? 'slide-left' : 'fade'
 
     useChangeTitle(to)
-    done()
   })
 }

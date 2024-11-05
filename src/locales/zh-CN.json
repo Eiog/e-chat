@@ -1,0 +1,9 @@
+{
+  "GLOBAL": {
+    "MENU": {
+      "CHAT": "聊天",
+      "FRIEND": "好友",
+      "SETTING": "设置"
+    }
+  }
+}
